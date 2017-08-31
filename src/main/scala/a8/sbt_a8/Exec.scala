@@ -7,7 +7,7 @@ import sbt.File
 
 object Exec {
 
-  def apply(args: String*)(implicit logger: sbt.Logger): Exec =
+  def apply(args: String*)(implicit logger: Option[sbt.Logger]): Exec =
     Exec(args, None)
 
   case class Result(
@@ -22,7 +22,7 @@ case class Exec(
   args: Iterable[String],
   workingDirectory: Option[File] = None
 ) (
-  implicit logger: sbt.Logger
+  implicit logger: Option[sbt.Logger]
 ) {
 
   def inDirectory(directory: File) =
@@ -39,7 +39,7 @@ case class Exec(
     val stderr = new ByteArrayOutputStream
     val stdoutWriter = new PrintWriter(stdout)
     val stderrWriter = new PrintWriter(stderr)
-    logger.debug(toString)
+    logger.foreach(_.debug(toString))
     val exitCode = _process.!(ProcessLogger(stdoutWriter.println, stderrWriter.println))
     stdoutWriter.close()
     stderrWriter.close()
@@ -54,7 +54,7 @@ case class Exec(
   }
 
   def execInline(failOnNonZeroExitCode: Boolean = true): Int = {
-    logger.debug(toString)
+    logger.foreach(_.debug(toString))
     val exitCode = _process.!
     if ( failOnNonZeroExitCode && exitCode != 0 )
       sys.error(s"error running ${this}")

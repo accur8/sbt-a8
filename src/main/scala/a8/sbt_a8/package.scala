@@ -22,9 +22,9 @@ package object sbt_a8 {
       Option(System.getProperty("buildNumber"))
         .map("system property" -> _)
         .getOrElse {
-          val branchName = Exec(Utilities.resolvedGitExec, "branch").execCaptureOutput()
+          val branchName = Exec(Utilities.resolvedGitExec, "branch")(None).execCaptureOutput()
           val now = java.time.LocalDateTime.now()
-          "generated" -> f"${now.getYear}%04d${1+now.getMonth.ordinal}%02d${now.getDayOfMonth}_%02d${now.getHour}%02d${now.getMinute}%02d_${branchName}"
+          "generated" -> f"${now.getYear}%04d${1+now.getMonth.ordinal}%02d${now.getDayOfMonth}%02d${now.getHour}%02d${now.getMinute}%02d_${branchName}"
         }
 
     val v = s"${baseVersion}-${buildNumber._2}"
@@ -34,7 +34,7 @@ package object sbt_a8 {
   }
 
   def generateBuildInfo(projectName: String, version: String, outputDir: File, logger: sbt.Logger): Seq[File] = {
-    val bi = new BuildInfoGenerator(projectName, version, outputDir)(logger)
+    val bi = new BuildInfoGenerator(projectName, version, outputDir)(Some(logger))
     bi.generate()
   }
 
