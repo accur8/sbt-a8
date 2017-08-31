@@ -14,6 +14,21 @@ package object sbt_a8 {
     versionProps(projectDir)(name)
   }
 
+  def branchName(projectDir: File) = {
+    val branchWithOrigin =
+      Exec(Utilities.resolvedGitExec, "logsymbolic-ref" ,"--short", "HEAD")(None)
+        .inDirectory(projectDir)
+        .execCaptureOutput()
+        .stdout
+        .replace("-", "")
+        .trim
+        .split(",")
+        .toList match {
+          case _ :: branch :: tail => branch
+        }
+    branchWithOrigin.split("/", 2).last.replace("/", "")
+  }
+
   def versionStamp(projectDir: File): String = {
 
     val baseVersion = versionProps(projectDir)("this")
@@ -22,9 +37,8 @@ package object sbt_a8 {
       Option(System.getProperty("buildNumber"))
         .map("system property" -> _)
         .getOrElse {
-          val branchName = Exec(Utilities.resolvedGitExec, "symbolic-ref" ,"--short", "HEAD")(None).execCaptureOutput().stdout.replace("-", "").trim
           val now = java.time.LocalDateTime.now()
-          "generated" -> f"${now.getYear}%04d${1+now.getMonth.ordinal}%02d${now.getDayOfMonth}%02d_${now.getHour}%02d${now.getMinute}%02d_${branchName}"
+          "generated" -> f"${now.getYear}%04d${1+now.getMonth.ordinal}%02d${now.getDayOfMonth}%02d_${now.getHour}%02d${now.getMinute}%02d_${branchName(projectDir)}"
         }
 
     val v = s"${baseVersion}-${buildNumber._2}"
