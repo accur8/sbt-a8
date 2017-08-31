@@ -1,8 +1,11 @@
 package a8.sbt_a8
 
 import sbt._
-import Keys._
-import sbt.Scoped._
+import Keys.{sourceGenerators, _}
+
+
+object SharedSettings extends SharedSettings
+
 
 trait SharedSettings {
 
@@ -28,7 +31,6 @@ trait SharedSettings {
       .settings(settings: _*)
       .settings(Keys.name := artifactName)
   }
-
 
   def jvmProject(artifactName: String, dir: java.io.File, id: Option[String] = None) =
     bareProject(artifactName, dir, id)

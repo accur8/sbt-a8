@@ -14,15 +14,13 @@ import sbt.IO
   */
 class BuildInfoGenerator(projectName: String, version: String, outputDir: File)(implicit logger: sbt.Logger) {
 
+  import Utilities.resolvedGitExec
+
   lazy val outputBasicFile: File = new File(outputDir, "META-INF/version.properties")
   lazy val outputDetailsFile: File = new File(outputDir, "META-INF/version-details.properties")
 
   lazy val logMessageCount = 99
   lazy val revListCount = 99
-
-  lazy val resolvedGitExec: String =
-    if (Utilities.isWindows) "git.exe"
-    else "git"
 
   def generate(): Seq[File] = {
     logger.debug("build info generated")

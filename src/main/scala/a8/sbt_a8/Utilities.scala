@@ -8,5 +8,9 @@ object Utilities {
     return (os.indexOf("win") >= 0)
   }
 
+  lazy val resolvedGitExec: String =
+    if (Utilities.isWindows) "git.exe"
+    else "git"
+
 }
 
