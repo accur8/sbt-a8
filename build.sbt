@@ -2,7 +2,7 @@ import Dependencies._
 
 lazy val appVersion = {
   val now = java.time.LocalDateTime.now()
-  val timestamp = f"${now.getYear}%02d${1+now.getMonth.ordinal}%02d${now.getDayOfMonth}%02d_${now.getHour}%02d${now.getMinute}"
+  val timestamp = f"${now.getYear}%02d${1+now.getMonth.ordinal}%02d${now.getDayOfMonth}%02d_${now.getHour}%02d${now.getMinute}%02d"
   val v = s"0.1.0-${timestamp}"
   println(s"setting version to ${v}")
   v

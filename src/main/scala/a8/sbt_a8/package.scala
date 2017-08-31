@@ -22,12 +22,12 @@ package object sbt_a8 {
       Option(System.getProperty("buildNumber"))
         .map("system property" -> _)
         .getOrElse {
-          val branchName = Exec(Utilities.resolvedGitExec, "branch")(None).execCaptureOutput()
+          val branchName = Exec(Utilities.resolvedGitExec, "symbolic-ref" ,"--short", "HEAD")(None).execCaptureOutput().stdout.replace("-", "")
           val now = java.time.LocalDateTime.now()
-          "generated" -> f"${now.getYear}%04d${1+now.getMonth.ordinal}%02d${now.getDayOfMonth}%02d${now.getHour}%02d${now.getMinute}%02d_${branchName}"
+          "generated" -> f"${now.getYear}%04d${1+now.getMonth.ordinal}%02d${now.getDayOfMonth}%02d_${now.getHour}%02d${now.getMinute}%02d_${branchName}"
         }
 
-    val v = s"${baseVersion}-${buildNumber._2}"
+    val v = s"${baseVersion}.${buildNumber._2}"
     println(s"using version = ${v} -- ${buildNumber._1}")
     v
 
