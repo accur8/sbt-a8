@@ -16,7 +16,7 @@ package object sbt_a8 {
 
   def branchName(projectDir: File) = {
     val branchWithOrigin =
-      Exec(Utilities.resolvedGitExec, "logsymbolic-ref" ,"--short", "HEAD")(None)
+      Exec(Utilities.resolvedGitExec, "log", "-n", "1", "--pretty=%d", "HEAD")(None)
         .inDirectory(projectDir)
         .execCaptureOutput()
         .stdout
