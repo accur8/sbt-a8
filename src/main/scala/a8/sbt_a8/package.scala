@@ -14,19 +14,27 @@ package object sbt_a8 {
     versionProps(projectDir)(name)
   }
 
+  def parseGitBranchName(gitLogStdout: String): String = {
+    gitLogStdout
+      .replace("-", "")
+      .trim
+      .replace(")", "")
+      .split(",")
+      .toList
+      .head
+      .split(">")
+      .toList match {
+        case _ :: branch :: Nil => branch.trim.replace("/", "")
+      }
+  }
+
   def branchName(projectDir: File) = {
-    val branchWithOrigin =
-      Exec(Utilities.resolvedGitExec, "log", "-n", "1", "--pretty=%d", "HEAD")(None)
-        .inDirectory(projectDir)
-        .execCaptureOutput()
-        .stdout
-        .replace("-", "")
-        .trim
-        .split(",")
-        .toList match {
-          case _ :: branch :: tail => branch
-        }
-    branchWithOrigin.split("/", 2).last.replace("/", "")
+    val gitLogStdout = Exec(Utilities.resolvedGitExec, "log", "-n", "1", "--pretty=%d", "HEAD")(None)
+      .inDirectory(projectDir)
+      .execCaptureOutput()
+      .stdout
+
+    parseGitBranchName(gitLogStdout)
   }
 
   def versionStamp(projectDir: File): String = {
