@@ -9,7 +9,6 @@ lazy val appVersion = {
 }
 
 scalaVersion in Global := "2.12.3"
-crossSbtVersions in Global := Vector("0.13.15", "1.0.1")
 
 lazy val root = (project in file(".")).
   settings(
