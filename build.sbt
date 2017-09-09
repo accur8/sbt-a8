@@ -8,12 +8,14 @@ lazy val appVersion = {
   v
 }
 
+scalaVersion in Global := "2.12.3"
+crossSbtVersions in Global := Vector("0.13.15", "1.0.1")
+
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
       sbtPlugin := true,
       organization := "a8",
-      scalaVersion := "2.10.6",
       version      := appVersion
     )),
     credentials += Credentials(Path.userHome / ".sbt" / "credentials"),
