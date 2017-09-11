@@ -15,17 +15,22 @@ package object sbt_a8 {
   }
 
   def parseGitBranchName(gitLogStdout: String): String = {
-    gitLogStdout
-      .replace("-", "")
-      .trim
-      .replace(")", "")
-      .split(",")
-      .toList
-      .head
-      .split(">")
-      .toList match {
-        case _ :: branch :: Nil => branch.trim.replace("/", "")
-      }
+    try {
+      gitLogStdout
+        .replace("-", "")
+        .trim
+        .replace(")", "")
+        .split(",")
+        .toList
+        .head
+        .split(">")
+        .toList match {
+          case _ :: branch :: Nil => branch.trim.replace("/", "")
+        }
+    } catch {
+      case e: Exception =>
+        throw new RuntimeException(s"error parsing '${gitLogStdout}'", e)
+    }
   }
 
   def branchName(projectDir: File) = {
