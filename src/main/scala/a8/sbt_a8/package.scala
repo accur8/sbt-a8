@@ -14,22 +14,41 @@ package object sbt_a8 {
     versionProps(projectDir)(name)
   }
 
+  implicit class StringOps(s: String) {
+    def splitList(regex: String): List[String] =
+      s.split(regex).toList.map(_.trim).filter(_.length > 0)
+  }
+
   def parseGitBranchName(gitLogStdout: String): String = {
+    val trimmedGitLogStdout = gitLogStdout.trim
     try {
-      gitLogStdout
-        .replace("-", "")
-        .trim
-        .replace(")", "")
-        .split(",")
-        .toList
-        .head
-        .split(">")
-        .toList match {
-          case _ :: branch :: Nil => branch.trim.replace("/", "")
-        }
+      val bn =
+        (trimmedGitLogStdout
+          .replace(")", "")
+          .replace("(", "")
+          .splitList(",")
+          .map(_.trim)
+          .filter(b => b != "HEAD" && b != "origin/HEAD")
+          .map { s =>
+            s.splitList("->") match {
+              case _ :: b :: Nil => b
+              case l => l.head
+            }
+          }
+          .headOption
+          .getOrElse {
+            println(s"unable to parse branch name from '${trimmedGitLogStdout}'")
+            "unknown"
+          }) match {
+            case b if b.startsWith("origin/") => b.substring("origin/".length)
+            case b => b
+          }
+      val bn1 = List("-", "/", "(", ")").fold(bn) { case (b0, i) => b0.replace(i, "") }
+      bn1
     } catch {
       case e: Exception =>
-        throw new RuntimeException(s"error parsing '${gitLogStdout}'", e)
+        println(s"unable to parse branch name from '${trimmedGitLogStdout}'")
+        "unknown"
     }
   }
 

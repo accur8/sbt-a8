@@ -14,7 +14,8 @@ class ParseBranchNameTests extends FunSuite {
     " (HEAD -> user/feature-branch/sub, origin/user/feature-branch/sub)" -> "userfeaturebranchsub",
     " (HEAD -> user/feature-branch/sub)" -> "userfeaturebranchsub",
     " (HEAD -> master, origin/master, origin/HEAD, user/feature-branch)" -> "master",
-    " (HEAD -> master, origin/master, origin/HEAD)" -> "master"
+    " (HEAD -> master, origin/master, origin/HEAD)" -> "master",
+    " (HEAD, origin/master, origin/HEAD)" -> "master"
   )
 
   testData.foreach { item =>
