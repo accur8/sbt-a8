@@ -43,13 +43,18 @@ package object sbt_a8 {
             case b if b.startsWith("origin/") => b.substring("origin/".length)
             case b => b
           }
-      val bn1 = List("-", "/", "(", ")").fold(bn) { case (b0, i) => b0.replace(i, "") }
-      bn1
+      scrubBranchName(bn)
     } catch {
       case e: Exception =>
         println(s"unable to parse branch name from '${trimmedGitLogStdout}'")
         "unknown"
     }
+  }
+
+  def scrubBranchName(unscrubbedName: String): String = {
+    unscrubbedName
+      .filter(ch => ch.isLetterOrDigit)
+      .toLowerCase
   }
 
   def branchName(projectDir: File) = {
