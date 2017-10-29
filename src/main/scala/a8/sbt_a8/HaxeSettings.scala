@@ -4,6 +4,15 @@ import sbt._
 import Keys._
 import Utilities._
 
+/*
+
+  TODO move into sbt-a8
+  TODO figure out ordering issues (compile tests before they run)
+  DONE copy haxe source to target/classes/haxe-src
+  DONE test run
+
+*/
+
 trait HaxeSettings { self: SharedSettings =>
 
   object impl {
@@ -110,9 +119,7 @@ trait HaxeSettings { self: SharedSettings =>
           }
         }
       }
-
     }
-    println(jars)
   }
 
   def runHaxeBuild(context: String, buildFile: String, logger: sbt.Logger, projectRoot: java.io.File, copySources: Boolean = false): Unit = {
