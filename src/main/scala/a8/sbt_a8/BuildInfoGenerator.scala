@@ -12,7 +12,7 @@ import sbt.IO
   * These files contain the build info useful for re-creating the dev state of a running
   * production system
   */
-class BuildInfoGenerator(projectName: String, version: String, outputDir: File)(implicit logger: Option[sbt.Logger]) {
+class BuildInfoGenerator(projectName: String, version: String, outputDir: File)(implicit logger: sbt.Logger) {
 
   import Utilities.resolvedGitExec
 
@@ -23,15 +23,15 @@ class BuildInfoGenerator(projectName: String, version: String, outputDir: File)(
   lazy val revListCount = 99
 
   def generate(): Seq[File] = {
-    logger.foreach(_.debug("build info generated"))
+    logger.debug("build info generated")
     outputResults
-    logger.foreach(_.debug("build info generated"))
+    logger.debug("build info generated")
     Seq(outputBasicFile, outputDetailsFile)
   }
 
   private def outputResults = {
     outputBasicFile.getParentFile.mkdirs
-    logger.foreach(_.debug("outputting results to " + outputBasicFile.getCanonicalPath))
+    logger.debug("outputting results to " + outputBasicFile.getCanonicalPath)
     val localhost: InetAddress = InetAddress.getLocalHost
 
     val basic = s"""

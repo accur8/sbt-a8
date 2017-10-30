@@ -57,8 +57,8 @@ package object sbt_a8 {
       .toLowerCase
   }
 
-  def branchName(projectDir: File) = {
-    val gitLogStdout = Exec(Utilities.resolvedGitExec, "log", "-n", "1", "--pretty=%d", "HEAD")(None)
+  def branchName(projectDir: File)(implicit logger: sbt.Logger) = {
+    val gitLogStdout = Exec(Utilities.resolvedGitExec, "log", "-n", "1", "--pretty=%d", "HEAD")
       .inDirectory(projectDir)
       .execCaptureOutput()
       .stdout
@@ -67,6 +67,8 @@ package object sbt_a8 {
   }
 
   def versionStamp(projectDir: File): String = {
+
+    implicit val logger = sbt.Logger.Null
 
     val baseVersion = versionProps(projectDir)("this")
 
@@ -85,7 +87,7 @@ package object sbt_a8 {
   }
 
   def generateBuildInfo(projectName: String, version: String, outputDir: File, logger: sbt.Logger): Seq[File] = {
-    val bi = new BuildInfoGenerator(projectName, version, outputDir)(Some(logger))
+    val bi = new BuildInfoGenerator(projectName, version, outputDir)(logger)
     bi.generate()
   }
 

@@ -45,7 +45,7 @@ trait HaxeSettings { self: SharedSettings =>
         Keys.name := name,
       )
 
-  def runHaxeTests(projectRoot: java.io.File, logger: sbt.Logger): Unit = {
+  def runHaxeTests(projectRoot: java.io.File)(implicit logger: sbt.Logger): Unit = {
 
     import impl._
     val skipHaxeTests = false
@@ -86,7 +86,9 @@ trait HaxeSettings { self: SharedSettings =>
   }
 
 
-  def processHaxeDeps(projectRoot: java.io.File, jars: Iterable[java.io.File], logger: sbt.Logger, force: Boolean): Unit = {
+  def processHaxeDeps(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], jars2: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: sbt.Logger): Unit = {
+
+    val jars: Iterable[java.io.File] = (jars1 ++ jars2).map(_.data).toList.distinct
 
     import java.util.jar._
     import scala.collection.JavaConverters._
@@ -122,11 +124,11 @@ trait HaxeSettings { self: SharedSettings =>
     }
   }
 
-  def runHaxeBuild(context: String, buildFile: String, logger: sbt.Logger, projectRoot: java.io.File, copySources: Boolean = false): Unit = {
+  def runHaxeBuild(context: String, buildFile: String, projectRoot: java.io.File, copySources: Boolean = false)(implicit logger: sbt.Logger): Unit = {
     if ( (projectRoot / buildFile).exists ) {
       val results =
         a8.sbt_a8
-          .Exec("haxe", buildFile)(Some(logger))
+          .Exec("haxe", buildFile)(logger)
           .inDirectory(projectRoot)
           .execCaptureOutput()
       val resultLines =
@@ -164,12 +166,12 @@ trait HaxeSettings { self: SharedSettings =>
   def haxeSettings: Seq[Def.Setting[_]] =
     Seq(
 
-        haxeDeps := processHaxeDeps(baseDirectory.value, (managedClasspath in Runtime).value.map(_.data), streams.value.log, true),
-        haxeDepsUnforced := processHaxeDeps(baseDirectory.value, (managedClasspath in Runtime).value.map(_.data), streams.value.log, false),
+        haxeDeps := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(streams.value.log),
+        haxeDepsUnforced := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, false)(streams.value.log),
 
         haxeTestsRun := {
           haxeTestCompile.value
-          runHaxeTests(baseDirectory.value, streams.value.log)
+          runHaxeTests(baseDirectory.value)(streams.value.log)
         },
 
         haxeCompile := {
@@ -177,9 +179,10 @@ trait HaxeSettings { self: SharedSettings =>
           runHaxeBuild(
             "haxe build",
             "build.hxml",
-            streams.value.log,
             baseDirectory.value,
             true,
+          )(
+            streams.value.log,
           )
         },
         (compile in Compile) := (compile in Compile).dependsOn(haxeCompile).value,
@@ -189,8 +192,9 @@ trait HaxeSettings { self: SharedSettings =>
           runHaxeBuild(
             "haxe test build",
             "tests-build.hxml",
-            streams.value.log,
             baseDirectory.value,
+          )(
+            streams.value.log,
           )
         },
         (test in Test) := (test in Test).dependsOn(haxeTestsRun).value,
