@@ -12,7 +12,7 @@ import sbt.IO
   * These files contain the build info useful for re-creating the dev state of a running
   * production system
   */
-class BuildInfoGenerator(projectName: String, version: String, outputDir: File)(implicit logger: sbt.Logger) {
+class BuildInfoGenerator(projectName: String, version: String, outputDir: File)(implicit logger: ProjectLogger) {
 
   import Utilities.resolvedGitExec
 

@@ -12,7 +12,7 @@ object Plugin extends AutoPlugin {
   override lazy val projectSettings =
     Seq(
       resourceGenerators in Compile += Def.task {
-        a8.sbt_a8.generateBuildInfo(name.value, version.value, (resourceManaged in Compile).value, streams.value.log)
+        a8.sbt_a8.generateBuildInfo(name.value, version.value, (resourceManaged in Compile).value)(new ProjectLogger(baseDirectory.value.name, streams.value.log))
       }.taskValue
     )
 

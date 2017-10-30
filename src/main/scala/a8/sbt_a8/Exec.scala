@@ -7,7 +7,7 @@ import sbt.File
 
 object Exec {
 
-  def apply(args: String*)(implicit logger: sbt.Logger): Exec =
+  def apply(args: String*)(implicit logger: ProjectLogger): Exec =
     Exec(args, None)
 
   case class Result(
@@ -22,7 +22,7 @@ case class Exec(
   args: Iterable[String],
   workingDirectory: Option[File] = None
 ) (
-  implicit logger: sbt.Logger
+  implicit logger: ProjectLogger
 ) {
 
   def inDirectory(directory: File) =

@@ -12,17 +12,6 @@ object Utilities {
     if (Utilities.isWindows) "git.exe"
     else "git"
 
-  lazy val workingPhantomjsInstall: Boolean = {
-    import sys.process._
-    try {
-      val exitCode: Int = Process(List("phantomjs", "-v")).!
-      exitCode == 0
-    } catch {
-      case e: java.io.IOException =>
-        // command not found
-        false
-    }
-  }
 
   def using[T <: java.io.Closeable, R](resource: T)(block: T => R): R = {
     try { block(resource) }

@@ -16,19 +16,26 @@ import Utilities._
 trait HaxeSettings { self: SharedSettings =>
 
   object impl {
-    lazy val workingPhantomjsInstall: Boolean = {
-      import sys.process._
-      try {
-        val exitCode: Int = Process(List("phantomjs", "-v")).!
-        exitCode == 0
-      } catch {
-        case e: java.io.IOException =>
-          // command not found
-          false
-      }
+
+    private var _workingPhantomjsInstall = none[Boolean]
+
+    def workingPhantomjsInstall(implicit logger: ProjectLogger): Boolean = {
+      if ( _workingPhantomjsInstall.isEmpty )
+        _workingPhantomjsInstall = Some(
+          try {
+            val results = Exec("phantomjs", "-v").execCaptureOutput(false)
+            results.exitCode == 0
+          } catch {
+            case e: java.io.IOException =>
+              // command not found
+              false
+          }
+        )
+      _workingPhantomjsInstall.get
     }
 
     lazy val haxeSrcJarPath = "haxe-src"
+
   }
 
   lazy val haxeCompile = taskKey[Unit]("Compile Haxe Code")
@@ -45,7 +52,7 @@ trait HaxeSettings { self: SharedSettings =>
         Keys.name := name,
       )
 
-  def runHaxeTests(projectRoot: java.io.File)(implicit logger: sbt.Logger): Unit = {
+  def runHaxeTests(projectRoot: java.io.File)(implicit logger: ProjectLogger): Unit = {
 
     import impl._
     val skipHaxeTests = false
@@ -61,6 +68,8 @@ trait HaxeSettings { self: SharedSettings =>
           import sys.process._
 
           val processLogger = ProcessLogger(line => logger.info(line), line => logger.warn(line))
+
+          logger.debug(s"running -- phantomjs ${testRunnerJs.name} -- in cwd -- ${projectRoot}")
 
           val pb: ProcessBuilder = Process(List("phantomjs", testRunnerJs.name), Some(projectRoot))
 
@@ -86,7 +95,7 @@ trait HaxeSettings { self: SharedSettings =>
   }
 
 
-  def processHaxeDeps(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], jars2: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: sbt.Logger): Unit = {
+  def processHaxeDeps(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], jars2: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: ProjectLogger): Unit = {
 
     val jars: Iterable[java.io.File] = (jars1 ++ jars2).map(_.data).toList.distinct
 
@@ -124,7 +133,7 @@ trait HaxeSettings { self: SharedSettings =>
     }
   }
 
-  def runHaxeBuild(context: String, buildFile: String, projectRoot: java.io.File, copySources: Boolean = false)(implicit logger: sbt.Logger): Unit = {
+  def runHaxeBuild(context: String, buildFile: String, projectRoot: java.io.File, copySources: Boolean = false)(implicit logger: ProjectLogger): Unit = {
     if ( (projectRoot / buildFile).exists ) {
       val results =
         a8.sbt_a8
@@ -166,12 +175,12 @@ trait HaxeSettings { self: SharedSettings =>
   def haxeSettings: Seq[Def.Setting[_]] =
     Seq(
 
-        haxeDeps := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(streams.value.log),
-        haxeDepsUnforced := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, false)(streams.value.log),
+        haxeDeps := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(new ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        haxeDepsUnforced := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, false)(new ProjectLogger(baseDirectory.value.name, streams.value.log)),
 
         haxeTestsRun := {
           haxeTestCompile.value
-          runHaxeTests(baseDirectory.value)(streams.value.log)
+          runHaxeTests(baseDirectory.value)(new ProjectLogger(baseDirectory.value.name, streams.value.log))
         },
 
         haxeCompile := {
@@ -182,7 +191,7 @@ trait HaxeSettings { self: SharedSettings =>
             baseDirectory.value,
             true,
           )(
-            streams.value.log,
+            new ProjectLogger(baseDirectory.value.name, streams.value.log),
           )
         },
         (compile in Compile) := (compile in Compile).dependsOn(haxeCompile).value,
@@ -194,7 +203,7 @@ trait HaxeSettings { self: SharedSettings =>
             "tests-build.hxml",
             baseDirectory.value,
           )(
-            streams.value.log,
+            new ProjectLogger(baseDirectory.value.name, streams.value.log),
           )
         },
         (test in Test) := (test in Test).dependsOn(haxeTestsRun).value,
