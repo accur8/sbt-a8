@@ -29,6 +29,12 @@ trait SharedSettings {
        fork := false
      )
 
+  def javaSettings: Seq[Def.Setting[_]] =
+    Seq(
+      crossPaths := false,
+      autoScalaLibrary := false
+    )
+
   def bareProject(artifactName: String, dir: java.io.File, id: Option[String] = None) = {
     Project(id.getOrElse(dir.name).replaceAll("-","_"), dir)
       .settings(settings: _*)
@@ -38,5 +44,9 @@ trait SharedSettings {
   def jvmProject(artifactName: String, dir: java.io.File, id: Option[String] = None) =
     bareProject(artifactName, dir, id)
       .settings(jvmSettings: _*)
+
+  def javaProject(artifactName: String, dir: java.io.File, id: Option[String] = None) =
+    jvmProject(artifactName, dir, id)
+      .settings(javaSettings: _*)
 
 }
