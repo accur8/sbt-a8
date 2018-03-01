@@ -6,7 +6,7 @@ import Utilities._
 
 /*
 
-  TODO move into sbt-a8
+  DONE move into sbt-a8
   TODO figure out ordering issues (compile tests before they run)
   DONE copy haxe source to target/classes/haxe-src
   DONE test run
@@ -56,7 +56,12 @@ trait HaxeSettings { self: SharedSettings =>
 
     import impl._
     val skipHaxeTests = false
-    val testRunnerJs = projectRoot / "tests-automated-runner.js"
+    val testRunnerJs0 = projectRoot / "tests-automated-runner.js"
+    val testRunnerJs1 = projectRoot / "src-deps" / "tests-automated-runner.js"
+
+    val testRunnerJs =
+      if ( testRunnerJs0.exists ) testRunnerJs0
+      else testRunnerJs1
 
     if ( !skipHaxeTests ) {
       if (!workingPhantomjsInstall && testRunnerJs.exists) {
@@ -71,7 +76,7 @@ trait HaxeSettings { self: SharedSettings =>
 
           logger.debug(s"running -- phantomjs ${testRunnerJs.name} -- in cwd -- ${projectRoot}")
 
-          val pb: ProcessBuilder = Process(List("phantomjs", testRunnerJs.name), Some(projectRoot))
+          val pb: ProcessBuilder = Process(List("phantomjs", testRunnerJs.name), Some(testRunnerJs.getParentFile))
 
           val process = pb.run(processLogger)
 
