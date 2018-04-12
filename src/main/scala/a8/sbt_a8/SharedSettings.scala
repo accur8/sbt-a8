@@ -35,17 +35,17 @@ trait SharedSettings {
       autoScalaLibrary := false
     )
 
-  def bareProject(artifactName: String, dir: java.io.File, id: Option[String] = None) = {
-    Project(id.getOrElse(dir.name).replaceAll("-","_"), dir)
+  def bareProject(artifactName: String, dir: java.io.File, id: String) = {
+    Project(id, dir)
       .settings(settings: _*)
       .settings(Keys.name := artifactName)
   }
 
-  def jvmProject(artifactName: String, dir: java.io.File, id: Option[String] = None) =
+  def jvmProject(artifactName: String, dir: java.io.File, id: String) =
     bareProject(artifactName, dir, id)
       .settings(jvmSettings: _*)
 
-  def javaProject(artifactName: String, dir: java.io.File, id: Option[String] = None) =
+  def javaProject(artifactName: String, dir: java.io.File, id: String) =
     jvmProject(artifactName, dir, id)
       .settings(javaSettings: _*)
 

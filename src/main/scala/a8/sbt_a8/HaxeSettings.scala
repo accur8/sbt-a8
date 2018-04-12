@@ -44,8 +44,8 @@ trait HaxeSettings { self: SharedSettings =>
   lazy val haxeDeps = taskKey[Unit]("Generate src-deps folder")
   lazy val haxeDepsUnforced = taskKey[Unit]("Generate src-deps folder if it doesn't already exist")
 
-  def haxeProject(name: String, dir: java.io.File) =
-    bareProject(dir.name, dir)
+  def haxeProject(name: String, dir: java.io.File, id: String) =
+    bareProject(dir.name, dir, id)
       .settings(settings: _*)
       .settings(haxeSettings: _*)
       .settings(
