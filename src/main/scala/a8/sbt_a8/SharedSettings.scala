@@ -4,7 +4,7 @@ import sbt._
 import Keys.{sourceGenerators, _}
 
 
-object SharedSettings extends SharedSettings
+object SharedSettings extends SharedSettings with HaxeSettings
 
 
 trait SharedSettings {

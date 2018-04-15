@@ -23,10 +23,16 @@ class BuildInfoGenerator(projectName: String, version: String, outputDir: File)(
   lazy val revListCount = 99
 
   def generate(): Seq[File] = {
-    logger.debug("build info generated")
-    outputResults
-    logger.debug("build info generated")
-    Seq(outputBasicFile, outputDetailsFile)
+    val result = Exec(resolvedGitExec, "status").execCaptureOutput(false)
+    if ( result.exitCode == 0 ) {
+      logger.debug("build info generated")
+      outputResults
+      logger.debug("build info generated")
+      Seq(outputBasicFile, outputDetailsFile)
+    } else {
+      logger.debug("no build info generated git status failed")
+      Seq()
+    }
   }
 
   private def outputResults = {
