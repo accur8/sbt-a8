@@ -8,7 +8,7 @@ lazy val appVersion = {
   v
 }
 
-scalaVersion in Global := "2.12.5"
+scalaVersion in Global := "2.12.6"
 
 lazy val root = (project in file(".")).
   settings(
@@ -18,7 +18,7 @@ lazy val root = (project in file(".")).
       version      := appVersion
     )),
     credentials += Credentials(Path.userHome / ".sbt" / "credentials"),
-    publishTo := Some("Artifactory Realm" at "https://accur8.artifactoryonline.com/accur8/sbt-plugins/"),
+    publishTo := Some("Artifactory Realm" at "https://accur8.jfrog.io/accur8/sbt-plugins/"),
     name := "sbt-a8",
     libraryDependencies += scalaTest % Test
   )
