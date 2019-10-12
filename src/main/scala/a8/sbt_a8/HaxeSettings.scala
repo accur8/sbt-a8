@@ -15,7 +15,7 @@ import Utilities._
 
 trait HaxeSettings { self: SharedSettings =>
 
-  object impl {
+  private object impl {
 
     private var _workingPhantomjsInstall = none[Boolean]
 
@@ -72,7 +72,7 @@ trait HaxeSettings { self: SharedSettings =>
 
           import sys.process._
 
-          val processLogger = ProcessLogger(line => logger.info(line), line => logger.warn(line))
+          val processLogger = ProcessLogger(line => logger.debug(line), line => logger.warn(line))
 
           logger.debug(s"running -- phantomjs ${testRunnerJs.name} -- in cwd -- ${projectRoot}")
 
@@ -114,12 +114,12 @@ trait HaxeSettings { self: SharedSettings =>
     }
 
     if ( srcDepsDir.exists ) {
-      logger.info(s"${impl.haxeSrcJarPath} already exists no action taken ${srcDepsDir}")
+      logger.debug(s"${impl.haxeSrcJarPath} already exists no action taken ${srcDepsDir}")
     } else {
       srcDepsDir.mkdirs()
       val prefixes = List(impl.haxeSrcJarPath + "/", "webapp/")
       for (artifact <- jars) {
-        logger.info("processing artifact " + artifact)
+        logger.debug("processing artifact " + artifact)
         if (artifact.getName.endsWith("jar")){
           val jarFile = new JarFile(artifact)
           jarFile.entries.asScala.foreach { entry =>
@@ -155,14 +155,14 @@ trait HaxeSettings { self: SharedSettings =>
       if ( results.stderr.nonEmpty )
         logger.warn(message)
       else
-        logger.info(message)
+        logger.debug(message)
 
       if ( copySources ) {
 
         val sourcesFrom = projectRoot / s"src"
         val sourcesTo = projectRoot / s"target/scala-2.12/classes/${impl.haxeSrcJarPath}"
 
-        logger.info(s"copying haxe sources from ${sourcesFrom} into ${sourcesTo}")
+        logger.debug(s"copying haxe sources from ${sourcesFrom} into ${sourcesTo}")
         sourcesTo.mkdirs
 
         sbt.IO.copyDirectory(sourcesFrom, sourcesTo, overwrite = true, preserveLastModified = false)

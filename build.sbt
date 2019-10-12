@@ -1,4 +1,6 @@
-import Dependencies._
+import Dependencies.{scalaTest, _}
+import sbt.Credentials
+import sbt.Keys.{credentials, libraryDependencies, publishTo}
 
 lazy val appVersion = {
   val now = java.time.LocalDateTime.now()
@@ -17,8 +19,11 @@ lazy val root = (project in file(".")).
       organization := "a8",
       version      := appVersion
     )),
+
+    resolvers += "a8-repo" at "https://accur8.jfrog.io/accur8/all/",
     credentials += Credentials(Path.userHome / ".sbt" / "credentials"),
     publishTo := Some("Artifactory Realm" at "https://accur8.jfrog.io/accur8/sbt-plugins/"),
     name := "sbt-a8",
-    libraryDependencies += scalaTest % Test
+    libraryDependencies += scalaTest % Test,
+    libraryDependencies += "a8" %% "jetty-runner" % "2.7.1-20191001_1049_master" % "compile",
   )
