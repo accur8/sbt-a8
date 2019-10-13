@@ -20,8 +20,13 @@ object Utilities {
 
 
   implicit class FileOps(file: java.io.File) {
+
+//    def /(name: String) =
+//      new java.io.File(file, name)
+
     def write(bytes: Array[Byte]): Unit =
       using(new java.io.FileOutputStream(file))(_.write(bytes))
+
   }
 
   implicit class InputStreamOps(is: java.io.InputStream) {

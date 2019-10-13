@@ -20,7 +20,7 @@ trait SharedSettings {
       fork := true,
       javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
       (resourceGenerators in Compile) += Def.task[Seq[File]] {
-        a8.sbt_a8.generateBuildInfo(name.value, version.value, (resourceManaged in Compile).value)(new ProjectLogger(baseDirectory.value.name, streams.value.log))
+        a8.sbt_a8.generateBuildInfo(name.value, version.value, (resourceManaged in Compile).value)(ProjectLogger(baseDirectory.value.name, streams.value.log))
       }
     )
 

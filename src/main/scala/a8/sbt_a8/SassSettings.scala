@@ -113,8 +113,8 @@ trait SassSettings { self: SharedSettings =>
 
   def sassSettings: Seq[Def.Setting[_]] =
     Seq(
-        sassDeps := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(new ProjectLogger(baseDirectory.value.name, streams.value.log)),
-        sassDepsUnforced := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, false)(new ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        sassDeps := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        sassDepsUnforced := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, false)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
 
         sassCompile := {
           sassDepsUnforced.value // force sassDeps to run
@@ -124,7 +124,7 @@ trait SassSettings { self: SharedSettings =>
             baseDirectory.value,
             true,
           )(
-            new ProjectLogger(baseDirectory.value.name, streams.value.log),
+            ProjectLogger(baseDirectory.value.name, streams.value.log),
           )
         },
         (compile in Compile) := (compile in Compile).dependsOn(sassCompile).value,

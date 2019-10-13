@@ -68,7 +68,7 @@ package object sbt_a8 {
 
   def versionStamp(projectDir: File): String = {
 
-    implicit val logger = new ProjectLogger("root", sbt.Logger.Null)
+    implicit val logger = ProjectLogger("root", sbt.Logger.Null)
 
     val baseVersion = versionProps(projectDir)("this")
 

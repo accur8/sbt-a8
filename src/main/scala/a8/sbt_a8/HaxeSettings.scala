@@ -180,12 +180,12 @@ trait HaxeSettings { self: SharedSettings =>
   def haxeSettings: Seq[Def.Setting[_]] =
     Seq(
 
-        haxeDeps := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(new ProjectLogger(baseDirectory.value.name, streams.value.log)),
-        haxeDepsUnforced := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, false)(new ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        haxeDeps := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        haxeDepsUnforced := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, false)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
 
         haxeTestsRun := {
           haxeTestCompile.value
-          runHaxeTests(baseDirectory.value)(new ProjectLogger(baseDirectory.value.name, streams.value.log))
+          runHaxeTests(baseDirectory.value)(ProjectLogger(baseDirectory.value.name, streams.value.log))
         },
 
         haxeCompile := {
@@ -196,7 +196,7 @@ trait HaxeSettings { self: SharedSettings =>
             baseDirectory.value,
             true,
           )(
-            new ProjectLogger(baseDirectory.value.name, streams.value.log),
+            ProjectLogger(baseDirectory.value.name, streams.value.log),
           )
         },
         (compile in Compile) := (compile in Compile).dependsOn(haxeCompile).value,
@@ -208,7 +208,7 @@ trait HaxeSettings { self: SharedSettings =>
             "tests-build.hxml",
             baseDirectory.value,
           )(
-            new ProjectLogger(baseDirectory.value.name, streams.value.log),
+            ProjectLogger(baseDirectory.value.name, streams.value.log),
           )
         },
         (test in Test) := (test in Test).dependsOn(haxeTestsRun).value,

@@ -1,26 +1,29 @@
-package a8.sbt_a8
+package a8.sbt_a8.dobby
 
+
+import java.nio.file.{Path, Paths}
+
+import a8.sbt_a8.ProjectLogger
+import sbt.internal.util.Attributed
 import a8.sbt_a8.Utilities._
-import net.model3.servlet.runner.JettyRunner
-import sbt.Keys._
 import sbt._
+import Keys._
+import scala.collection.JavaConverters._
 
-/*
+import scala.collection.mutable
 
+object DobbyImpl {
 
-*/
-
-trait WorkbenchSettings { self: SharedSettings =>
-
-  lazy val workbenchStart = taskKey[Unit]("Start Workbench Web Server")
-  lazy val workbenchGenerate = taskKey[Unit]("Generate webapp-composite folder")
-
-  def processStart(projectRoot: java.io.File)(implicit logger: ProjectLogger): Unit = {
-    JettyRunner.main(Array())
+  def runStart(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], jars2: Iterable[Attributed[java.io.File]], httpPort: Int, settings: DobbySettings)(implicit logger: ProjectLogger): Unit = {
+    runSetup(projectRoot, jars1, jars2, false)
+    stopServer(httpPort, settings)
+    val webappCompositeDir = projectRoot / "webapp-composite"
+    val ws = new WebServer(webappCompositeDir.toPath)
+    ws.start
+    settings.dobbyActiveServers(httpPort) = ws
   }
 
-
-  def processGenerate(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], jars2: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: ProjectLogger): Unit = {
+  def runSetup(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], jars2: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: ProjectLogger): Unit = {
 
     val jars: Iterable[java.io.File] = (jars1 ++ jars2).map(_.data).toList.distinct
 
@@ -59,15 +62,15 @@ trait WorkbenchSettings { self: SharedSettings =>
     }
   }
 
-  def workbenchSettings: Seq[Def.Setting[_]] =
-    Seq(
+  def stopServer(port: Int, settings: DobbySettings)(implicit logger: ProjectLogger): Unit = {
 
-      workbenchGenerate := processGenerate(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(new ProjectLogger(baseDirectory.value.name, streams.value.log)),
+    settings
+      .dobbyActiveServers
+      .remove(port)
+      .foreach { server =>
+        server.stop()
+      }
 
-      workbenchStart := {
-        processStart(baseDirectory.value)(new ProjectLogger(baseDirectory.value.name, streams.value.log))
-      },
-
-    )
+  }
 
 }

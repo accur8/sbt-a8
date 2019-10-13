@@ -25,5 +25,6 @@ lazy val root = (project in file(".")).
     publishTo := Some("Artifactory Realm" at "https://accur8.jfrog.io/accur8/sbt-plugins/"),
     name := "sbt-a8",
     libraryDependencies += scalaTest % Test,
-    libraryDependencies += "a8" %% "jetty-runner" % "2.7.1-20191001_1049_master" % "compile",
+    libraryDependencies += "io.undertow" % "undertow-core" % "2.0.26.Final",
+    libraryDependencies += "org.scalatra.scalate" % "scalate-core_2.12" % "1.9.5",
   )
