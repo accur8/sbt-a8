@@ -33,7 +33,7 @@ class WebServer(webappRoot: Path, port: Int = 8000, host: String = "localhost")(
     new SspHandler(
       webappRoot.toFile,
       Handlers.resource(
-        new PathResourceManager(webappRoot, 100, followSymlinks)
+        new PathResourceManager(webappRoot, 100, followSymlinks, Seq[String](): _*)
       ).setDirectoryListingEnabled(true)
     )
   }
