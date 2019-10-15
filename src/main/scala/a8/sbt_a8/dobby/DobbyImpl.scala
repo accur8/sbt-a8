@@ -86,11 +86,11 @@ object DobbyImpl {
       val canonicalSource = source.toFile.getCanonicalFile.toPath
       Files.deleteIfExists(target)
       if ( Files.exists(source) ) {
-        logger.debug(s"createSymbolicLink ${target} ${canonicalSource}")
+        logger.debug(s"canonicalized createSymbolicLink ${target} ${canonicalSource}")
         Files.createSymbolicLink(target, canonicalSource)
       } else {
-        val f = Files.readSymbolicLink(source)
-        logger.debug(s"createSymbolicLink ${target} ${canonicalSource}")
+          val f = Files.readSymbolicLink(source)
+        logger.debug(s"relative createSymbolicLink ${target} ${canonicalSource}")
         Files.createSymbolicLink(target, f)
       }
     } else if ( Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS) ) {

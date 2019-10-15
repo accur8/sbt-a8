@@ -13,7 +13,7 @@ import scala.collection.mutable
 class WebServer(webappRoot: Path, port: Int = 8000, host: String = "localhost")(implicit logger: ProjectLogger) {
 
   lazy val start = {
-    logger.info(s"starting Dobby server listening on port ${port} webappRoot of ${webappRoot}")
+    logger.info(s"starting Dobby server http://localhost:${port}/ webappRoot of ${webappRoot}")
     server.start()
   }
 
