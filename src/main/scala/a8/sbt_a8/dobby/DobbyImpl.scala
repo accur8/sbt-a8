@@ -19,8 +19,8 @@ object DobbyImpl {
   lazy val webappDobbyName = "webapp-dobby"
 
 
-  def runStart(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], httpPort: Int, settings: DobbySettings)(implicit logger: ProjectLogger): Unit = {
-    runSetup(projectRoot, jars1, false)
+  def runStart(packageFile: java.io.File, projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], httpPort: Int, settings: DobbySettings)(implicit logger: ProjectLogger): Unit = {
+    runSetup(packageFile, projectRoot, jars1, false)
     stopServer(httpPort, settings)
     val webappCompositeDir = projectRoot / webappCompositeName
     val ws = new WebServer(webappCompositeDir.toPath)
@@ -28,7 +28,7 @@ object DobbyImpl {
     settings.dobbyActiveServers(httpPort) = ws
   }
 
-  def runSetup(projectRoot: java.io.File, jars0: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: ProjectLogger): Unit = {
+  def runSetup(packageFile: java.io.File, projectRoot: java.io.File, jars0: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: ProjectLogger): Unit = {
 
     val jars: Iterable[java.io.File] = jars0.map(_.data).toList.distinct
 

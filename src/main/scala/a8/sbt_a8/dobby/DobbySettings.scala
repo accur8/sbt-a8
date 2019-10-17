@@ -21,8 +21,8 @@ trait DobbySettings { self: SharedSettings =>
 
   def dobbySettings: Seq[Def.Setting[_]] = {
     Seq(
-      dobbySetup := runSetup(baseDirectory.value, (fullClasspath in Compile).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
-      dobbyStart := runStart(baseDirectory.value, (fullClasspath in Compile).value, dobbyHttpPort, this)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+      dobbySetup := runSetup((Keys.`package` in Compile).value, baseDirectory.value, (fullClasspath in Compile).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+      dobbyStart := runStart((Keys.`package` in Compile).value, baseDirectory.value, (fullClasspath in Compile).value, dobbyHttpPort, this)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
       dobbyStop  := stopServer(dobbyHttpPort, this)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
       (onUnload in Global) := {
         (onUnload in Global).value.compose { state =>
