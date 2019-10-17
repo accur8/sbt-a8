@@ -22,9 +22,9 @@ trait SassSettings { self: SharedSettings =>
         Keys.name := name,
       )
 
-  def processSassDeps(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], jars2: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: ProjectLogger): Unit = {
+  def processSassDeps(projectRoot: java.io.File, jars0: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: ProjectLogger): Unit = {
 
-    val jars: Iterable[java.io.File] = (jars1 ++ jars2).map(_.data).toList.distinct
+    val jars: Iterable[java.io.File] = jars0.map(_.data).toList.distinct
 
     import java.util.jar._
 
@@ -113,8 +113,8 @@ trait SassSettings { self: SharedSettings =>
 
   def sassSettings: Seq[Def.Setting[_]] =
     Seq(
-        sassDeps := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
-        sassDepsUnforced := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, false)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        sassDeps := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        sassDepsUnforced := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, false)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
 
         sassCompile := {
           sassDepsUnforced.value // force sassDeps to run

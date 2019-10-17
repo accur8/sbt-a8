@@ -19,8 +19,8 @@ object DobbyImpl {
   lazy val webappDobbyName = "webapp-dobby"
 
 
-  def runStart(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], jars2: Iterable[Attributed[java.io.File]], httpPort: Int, settings: DobbySettings)(implicit logger: ProjectLogger): Unit = {
-    runSetup(projectRoot, jars1, jars2, false)
+  def runStart(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], httpPort: Int, settings: DobbySettings)(implicit logger: ProjectLogger): Unit = {
+    runSetup(projectRoot, jars1, false)
     stopServer(httpPort, settings)
     val webappCompositeDir = projectRoot / webappCompositeName
     val ws = new WebServer(webappCompositeDir.toPath)
@@ -28,9 +28,9 @@ object DobbyImpl {
     settings.dobbyActiveServers(httpPort) = ws
   }
 
-  def runSetup(projectRoot: java.io.File, jars1: Iterable[Attributed[java.io.File]], jars2: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: ProjectLogger): Unit = {
+  def runSetup(projectRoot: java.io.File, jars0: Iterable[Attributed[java.io.File]], force: Boolean)(implicit logger: ProjectLogger): Unit = {
 
-    val jars: Iterable[java.io.File] = (jars1 ++ jars2).map(_.data).toList.distinct
+    val jars: Iterable[java.io.File] = jars0.map(_.data).toList.distinct
 
     import java.util.jar._
 
@@ -106,7 +106,7 @@ object DobbyImpl {
     val prefixes = List("webapp/")
     for (artifact <- jars) {
       logger.info("processing artifact " + artifact)
-      if (artifact.getName.endsWith("jar")) {
+      if (artifact.isFile && artifact.getName.endsWith("jar")) {
         val jarFile = new JarFile(artifact)
         jarFile.entries.asScala.foreach { entry =>
           prefixes.find(prefix => entry.getName.startsWith(prefix)).foreach { prefix =>
@@ -119,8 +119,34 @@ object DobbyImpl {
             }
           }
         }
+      } else if ( artifact.isDirectory ) {
+        val webappDir = new File(artifact, "webapp")
+        symlinkDir(webappDir, webappCompositeDir)
+      } else {
+        logger.warn(s"explodeWebjars() don't know how to handle artifact ${artifact.getAbsolutePath}")
       }
     }
+  }
+
+  def symlinkDir(sourceDir: File, targetDir: File)(implicit logger: ProjectLogger): Unit = {
+    if ( !targetDir.exists() )
+      targetDir.mkdirs()
+    val entries = Option(sourceDir.listFiles()).getOrElse(Array.empty)
+    entries
+      .foreach { sourceEntry =>
+        val targetEntry = new File(targetDir, sourceEntry.name)
+        sourceEntry match {
+          case _ if targetEntry.exists() =>
+            logger.warn(s"symlinkDir() targetEntry ${targetEntry}  already exists unable to link")
+          case f if f.isDirectory =>
+            symlinkDir(f, targetEntry)
+          case f if f.isFile =>
+            val link =
+            Files.createSymbolicLink(targetEntry.getAbsoluteFile.asPath, sourceEntry.getAbsoluteFile.asPath)
+          case f =>
+            logger.warn(s"symlinkDir() don't know how to handle ${f.getAbsolutePath}")
+        }
+      }
   }
 
   def stopServer(port: Int, settings: DobbySettings)(implicit logger: ProjectLogger): Unit = {
