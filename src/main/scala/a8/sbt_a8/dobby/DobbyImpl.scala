@@ -136,10 +136,10 @@ object DobbyImpl {
       .foreach { sourceEntry =>
         val targetEntry = new File(targetDir, sourceEntry.name)
         sourceEntry match {
-          case _ if targetEntry.exists() =>
-            logger.warn(s"symlinkDir() targetEntry ${targetEntry}  already exists unable to link")
           case f if f.isDirectory =>
             symlinkDir(f, targetEntry)
+          case _ if targetEntry.exists() =>
+            logger.warn(s"symlinkDir() targetEntry ${targetEntry}  already exists unable to link")
           case f if f.isFile =>
             val link =
             Files.createSymbolicLink(targetEntry.getAbsoluteFile.asPath, sourceEntry.getAbsoluteFile.asPath)
