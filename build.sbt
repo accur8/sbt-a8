@@ -10,7 +10,7 @@ lazy val appVersion = {
   v
 }
 
-scalaVersion in Global := "2.12.6"
+scalaVersion in Global := "2.12.10"
 
 lazy val root = (project in file(".")).
   settings(
