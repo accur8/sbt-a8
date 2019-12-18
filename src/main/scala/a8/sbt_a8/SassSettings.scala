@@ -30,14 +30,14 @@ trait SassSettings { self: SharedSettings =>
 
     import scala.collection.JavaConverters._
 
-    val srcDepsDir = projectRoot / "src-deps"
+    val srcDepsDir = projectRoot / "target/src-deps"
 
     if ( force ) {
       sbt.IO.delete(srcDepsDir)
     }
 
     if ( srcDepsDir.exists ) {
-      logger.info(s"${sassSrcJarPath} already exists no action taken ${srcDepsDir}")
+      logger.info(s"${srcDepsDir} already exists no action taken")
     } else {
       srcDepsDir.mkdirs()
       val prefixes = List(sassSrcJarPath + "/", "webapp/")

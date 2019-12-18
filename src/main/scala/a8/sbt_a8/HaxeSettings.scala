@@ -57,7 +57,7 @@ trait HaxeSettings { self: SharedSettings =>
     import impl._
     val skipHaxeTests = false
     val testRunnerJs0 = projectRoot / "tests-automated-runner.js"
-    val testRunnerJs1 = projectRoot / "src-deps" / "tests-automated-runner.js"
+    val testRunnerJs1 = projectRoot / "target/src-deps" / "tests-automated-runner.js"
 
     val testRunnerJs =
       if ( testRunnerJs0.exists ) testRunnerJs0
@@ -107,19 +107,19 @@ trait HaxeSettings { self: SharedSettings =>
     import java.util.jar._
     import scala.collection.JavaConverters._
 
-    val srcDepsDir = projectRoot / "src-deps"
+    val srcDepsDir = projectRoot / "target/src-deps"
 
     if ( force ) {
       sbt.IO.delete(srcDepsDir)
     }
 
     if ( srcDepsDir.exists ) {
-      logger.debug(s"${impl.haxeSrcJarPath} already exists no action taken ${srcDepsDir}")
+      logger.info(s"${srcDepsDir} already exists no action taken")
     } else {
       srcDepsDir.mkdirs()
       val prefixes = List(impl.haxeSrcJarPath + "/", "webapp/")
       for (artifact <- jars) {
-        logger.debug("processing artifact " + artifact)
+        logger.info("processing artifact " + artifact)
         if (artifact.getName.endsWith("jar")){
           val jarFile = new JarFile(artifact)
           jarFile.entries.asScala.foreach { entry =>
