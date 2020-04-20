@@ -27,4 +27,7 @@ lazy val root = (project in file(".")).
     libraryDependencies += scalaTest % Test,
     libraryDependencies += "io.undertow" % "undertow-core" % "2.0.26.Final",
     libraryDependencies += "org.scalatra.scalate" % "scalate-core_2.12" % "1.9.5",
+    libraryDependencies += "com.typesafe" % "config" % "1.3.3",
+    libraryDependencies += "com.github.andyglow" %% "typesafe-config-scala" % "1.0.3",
+
   )

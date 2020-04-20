@@ -2,13 +2,31 @@ package a8.sbt_a8.dobby
 
 import java.io.{PrintWriter, StringWriter}
 
+import a8.sbt_a8.{CascadingHocon, ProjectLogger}
+import com.typesafe.config.{Config, ConfigException}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.HttpString
 import org.fusesource.scalate.{Binding, DefaultRenderContext, TemplateEngine}
 import org.fusesource.scalate.servlet.TemplateEngineFilter.{debug, info}
 import org.fusesource.scalate.support.TemplateFinder
+import com.github.andyglow.config._
+import scala.sys.process.ProcessLogger
 
-class SspHandler(webappRoot: java.io.File, delegate: HttpHandler) extends HttpHandler {
+class SspHandler(webappRoot: java.io.File, delegate: HttpHandler)(implicit logger: ProjectLogger) extends HttpHandler { outer =>
+
+  var _config: Option[Config] = None
+
+  def config(): Config = {
+    _config match {
+      case None =>
+        val c = CascadingHocon.loadConfigsInDirectory(webappRoot.toPath)
+        _config = Some(c)
+        c
+      case Some(c) =>
+        c
+    }
+  }
+
 
   override def handleRequest(exchange: HttpServerExchange): Unit = {
     val path = exchange.getRequestPath
@@ -46,6 +64,22 @@ class SspHandler(webappRoot: java.io.File, delegate: HttpHandler) extends HttpHa
 
         val api =
           new SspApi {
+
+            override def reloadConfig(): Unit = _config = None
+
+            override def config: Config = outer.config()
+
+            override def getAttribute(name: String, default: String): String =
+              try {
+                outer
+                  .config()
+                  .get[Option[String]](name)
+                  .getOrElse(default)
+              } catch {
+                case e: Exception =>
+                  logger.warn(s"unable to resolve attribute ${name} -- ${e.getMessage}")
+                  default
+              }
             override def isDobby: Boolean = true
             override def setResponseHeader(name: String, value: String): Unit = exchange.getResponseHeaders.add(HttpString.tryFromString(name), value)
           }
