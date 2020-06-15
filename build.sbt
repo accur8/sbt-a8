@@ -10,6 +10,7 @@ lazy val appVersion = {
   v
 }
 
+
 scalaVersion in Global := "2.12.10"
 
 lazy val root = (project in file(".")).
@@ -19,10 +20,12 @@ lazy val root = (project in file(".")).
       organization := "a8",
       version      := appVersion
     )),
-
-    resolvers += "a8-repo" at "https://accur8.jfrog.io/accur8/all/",
-    credentials += Credentials(Path.userHome / ".sbt" / "credentials"),
-    publishTo := Some("Artifactory Realm" at "https://accur8.jfrog.io/accur8/sbt-plugins/"),
+    resolvers += "a8-repo" at readRepoUrl(),
+    publishTo := Some("a8-repo-releases" at "s3://s3-us-east-1.amazonaws.com/a8-artifacts/releases"),
+    s3CredentialsProvider := { (bucket: String) =>
+      import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+      new AWSStaticCredentialsProvider(new BasicAWSCredentials(readRepoProperty("publish_aws_access_key"), readRepoProperty("publish_aws_secret_key")))
+    },
     name := "sbt-a8",
     libraryDependencies += scalaTest % Test,
     libraryDependencies += "io.undertow" % "undertow-core" % "2.0.26.Final",
@@ -31,3 +34,40 @@ lazy val root = (project in file(".")).
     libraryDependencies += "com.github.andyglow" %% "typesafe-config-scala" % "1.0.3",
 
   )
+
+
+
+  def readRepoUrl() = readRepoProperty("repo_url")
+
+  def readRepoCredentials() = readCredentialsFromUrl("repo_url")
+
+  def readRepoProperty(propertyName: String): String = {
+    import scala.collection.JavaConverters._
+    import java.io.FileInputStream
+    val props = new java.util.Properties()
+    val configFile = new java.io.File(System.getProperty("user.home") + "/.a8/repo.properties")
+    if ( configFile.exists() ) {
+      val input = new FileInputStream(configFile)
+      try {
+        props.load(input)
+      } finally {
+        input.close()
+      }
+      props.asScala.get(propertyName) match {
+        case Some(s) =>
+          s
+        case None =>
+          sys.error("could not find property " + propertyName + " in " + configFile )
+      }
+    } else {
+      sys.error("config file " + configFile + " does not exist")
+    }
+  }
+
+
+  def readRepoCredentials(): Credentials = {
+    val user = readRepoProperty("repo_user")
+    val password = readRepoProperty("repo_password")
+    Credentials(
+      "Accur8 Repo", url.getHost, user, password)
+  }
