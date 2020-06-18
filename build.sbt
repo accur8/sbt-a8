@@ -39,8 +39,6 @@ lazy val root = (project in file(".")).
 
   def readRepoUrl() = readRepoProperty("repo_url")
 
-  def readRepoCredentials() = readCredentialsFromUrl("repo_url")
-
   def readRepoProperty(propertyName: String): String = {
     import scala.collection.JavaConverters._
     import java.io.FileInputStream
@@ -66,8 +64,11 @@ lazy val root = (project in file(".")).
 
 
   def readRepoCredentials(): Credentials = {
-    val user = readRepoProperty("repo_user")
-    val password = readRepoProperty("repo_password")
+    val repoUrl = new java.net.URL(readRepoUrl())
     Credentials(
-      "Accur8 Repo", url.getHost, user, password)
+      readRepoProperty("repo_realm"),
+      repoUrl.getHost,
+      readRepoProperty("repo_user"),
+      readRepoProperty("repo_password"),
+    )
   }
