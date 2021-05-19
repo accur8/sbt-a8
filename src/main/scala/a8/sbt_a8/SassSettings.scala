@@ -77,7 +77,7 @@ trait SassSettings { self: SharedSettings =>
               .inDirectory(projectRoot)
               .execCaptureOutput()
           val resultLines =
-            (results.stdout.lines ++ results.stderr.lines).filter(_.trim.nonEmpty) match {
+            (results.stdout.linesIterator ++ results.stderr.linesIterator).filter(_.trim.nonEmpty) match {
               case i if i.isEmpty => ""
               case i =>
                 "\n" + i.mkString("\n")

@@ -71,7 +71,7 @@ ${pipeCommand(resolvedGitExec, "config", "-l")}
 
   def pipeCommand(command: String*): String = {
     val result = Exec(command).execCaptureOutput()
-    val formattedText = convertToCommentedLines(result.stdout.lines.toIterable, command.mkString(" "))
+    val formattedText = convertToCommentedLines(result.stdout.linesIterator.toIterable, command.mkString(" "))
     formattedText
   }
 
