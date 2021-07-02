@@ -8,6 +8,11 @@ import sbt.{Keys, Project}
 
 package object sbt_a8 {
 
+  lazy val skipGit: Boolean =
+    System
+      .getProperty("skipGit", "false")
+      .toBoolean
+
   def versionProps(projectDir: File): Map[String,String] = loadProperties(new File(projectDir, "version.properties"))
 
   def dependencyVersion(projectDir: File, name: String) = {
@@ -57,13 +62,16 @@ package object sbt_a8 {
       .toLowerCase
   }
 
-  def branchName(projectDir: File)(implicit logger: ProjectLogger) = {
-    val gitLogStdout = Exec(Utilities.resolvedGitExec, "log", "-n", "1", "--pretty=%d", "HEAD")
-      .inDirectory(projectDir)
-      .execCaptureOutput()
-      .stdout
-
-    parseGitBranchName(gitLogStdout)
+  def branchName(projectDir: File)(implicit logger: ProjectLogger): String = {
+    if ( skipGit ) {
+      "skipgit"
+    } else {
+      val gitLogStdout = Exec(Utilities.resolvedGitExec, "log", "-n", "1", "--pretty=%d", "HEAD")
+        .inDirectory(projectDir)
+        .execCaptureOutput()
+        .stdout
+      parseGitBranchName(gitLogStdout)
+    }
   }
 
   def versionStamp(projectDir: File): String = {
