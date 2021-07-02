@@ -8,9 +8,9 @@ import sbt.{Keys, Project}
 
 package object sbt_a8 {
 
-  lazy val skipGit: Boolean =
-    System
-      .getProperty("skipGit", "false")
+  def skipGit(projectDir: File): Boolean =
+    versionProps(projectDir)
+      .getOrElse("skipGit", "false")
       .toBoolean
 
   def versionProps(projectDir: File): Map[String,String] = loadProperties(new File(projectDir, "version.properties"))
