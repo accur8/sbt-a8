@@ -63,7 +63,7 @@ package object sbt_a8 {
   }
 
   def branchName(projectDir: File)(implicit logger: ProjectLogger): String = {
-    if ( skipGit ) {
+    if ( skipGit(projectDir) ) {
       "skipgit"
     } else {
       val gitLogStdout = Exec(Utilities.resolvedGitExec, "log", "-n", "1", "--pretty=%d", "HEAD")
