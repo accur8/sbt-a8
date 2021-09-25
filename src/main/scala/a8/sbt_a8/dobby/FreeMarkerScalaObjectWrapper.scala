@@ -28,7 +28,7 @@ class ScalaObjectWrapper extends ObjectWrapper {
     // Circumflex model types
     //case wrapper: Wrapper[_] => wrap(wrapper.item)
     // Scala base types
-    case xml: NodeSeq => new ScalaXmlWrapper(xml, this)
+//    case xml: NodeSeq => new ScalaXmlWrapper(xml, this)
     case seq: Seq[_] => new ScalaSeqWrapper(seq, this)
     case map: scala.collection.Map[_, _] => new ScalaMapWrapper(map.map(p =>(p._1.toString, p._2)), this)
     case it: Iterable[_] => new ScalaIterableWrapper(it, this)
