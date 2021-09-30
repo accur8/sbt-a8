@@ -30,10 +30,8 @@ class FeeMarkerHandler(webappRoot: java.io.File, delegate: HttpHandler)(implicit
       val hasTemplate = engine.templateLoader.findTemplateSourceOpt(path).nonEmpty
       if ( hasTemplate ) {
         exchange.dispatch(this)
-        return
       } else {
         delegate.handleRequest(exchange)
-        return
       }
     } else {
       val responseBody = engine.processTemplate(path, exchange)

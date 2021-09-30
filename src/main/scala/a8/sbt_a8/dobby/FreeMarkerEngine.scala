@@ -1,17 +1,16 @@
 package a8.sbt_a8.dobby
 
 import a8.sbt_a8.dobby.FreeMarkerEngine.contentTypesByExt
+import com.github.andyglow.config._
 import com.typesafe.config.Config
-import freemarker.cache.{CacheStorage, TemplateLoader}
-import freemarker.template.{Configuration, TemplateExceptionHandler, TemplateModel, TemplateScalarModel}
+import freemarker.cache.TemplateLoader
+import freemarker.template.{Configuration, TemplateExceptionHandler, TemplateScalarModel}
+import io.undertow.server.HttpServerExchange
 import io.undertow.util.{Headers, HttpString}
 
+import java.io.StringWriter
 import java.nio.charset.Charset
 import scala.collection.mutable
-import com.github.andyglow.config._
-import io.undertow.server.HttpServerExchange
-
-import java.io.StringWriter
 
 object FreeMarkerEngine {
 
@@ -34,12 +33,6 @@ class FreeMarkerEngine(
   configGetter: ()=>Config,
   configResetter: ()=>Unit,
 ) {
-
-  lazy val possibleTemplateExtensions =
-    List(
-      "",
-      ".ftl",
-    )
 
   // Create your Configuration instance, and specify if up to what FreeMarker// Create your Configuration instance, and specify if up to what FreeMarker
 
@@ -67,14 +60,14 @@ class FreeMarkerEngine(
 
   object templateLoader extends TemplateLoader {
 
-    def findTemplateSource(d: java.io.File, name: String): Option[TemplateSource] =
-      possibleTemplateExtensions
-        .map(e => new java.io.File(d, name + e))
+    def findTemplateSource(d: java.io.File, name: String): Option[TemplateSource] = {
+      val ftlName = if ( name.endsWith(".ftl") ) name else name + ".ftl"
+      Some(new java.io.File(d, ftlName))
         .filter(_.exists)
-        .headOption
         .map { f =>
           TemplateSource(name, f.getCanonicalFile)
         }
+    }
 
     def findTemplateSourceOpt(name: String): Option[TemplateSource] = {
       webappRoots
@@ -166,6 +159,16 @@ class FreeMarkerEngine(
             System.err.println(s"unable to resolve attribute ${name} -- ${e.getMessage}")
             default
         }
+      override def getBoolean(name: String, default: Boolean): Boolean =
+        try {
+          configGetter()
+            .get[Option[Boolean]](name)
+            .getOrElse(default)
+        } catch {
+          case e: Exception =>
+            System.err.println(s"unable to resolve attribute ${name} -- ${e.getMessage}")
+            default
+        }
       override def isDobby: Boolean = true
       override def setResponseHeader(name: String, value: String): Unit = exchange.getResponseHeaders.add(HttpString.tryFromString(name), value)
     }
@@ -182,8 +185,6 @@ class FreeMarkerEngine(
     contentTypesByExt
       .get(extension)
       .foreach(contentType => exchange.getResponseHeaders.add(Headers.CONTENT_TYPE, contentType))
-
-    val templateSource = templateLoader.findTemplateSource(path)
 
     val template = newConfig().getTemplate(path)
 

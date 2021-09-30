@@ -12,6 +12,14 @@ object ScalaObjectWrapper {
   val delegateToDefault = true
   val defaultWrapper = new DefaultObjectWrapperBuilder(FreeMarkerEngine.version).build()
 
+  def unwrap(obj: Any): Any =
+    obj match {
+      case null => null
+      case scalar: TemplateScalarModel => scalar.getAsString
+      case bool: TemplateBooleanModel => bool.getAsBoolean.booleanValue()
+      case _ => sys.error(s"Unwrapping ${obj.getClass.getName} is unsupported")
+    }
+
 }
 
 class ScalaObjectWrapper extends ObjectWrapper {
@@ -76,13 +84,14 @@ class ScalaIteratorWrapper[T](val it: Iterator[T], wrapper: ObjectWrapper)
   def iterator = this
 }
 
-class ScalaMethodWrapper(val target: Any,
-                         val methodName: String,
-                         val wrapper: ObjectWrapper)
-  extends TemplateMethodModelEx {
-  def exec(arguments: java.util.List[_]) = {
-    ???
-    //    wrapper.wrap(MethodUtils.invokeMethod(target, methodName, arguments.toArray))
+class ScalaMethodWrapper(val target: Any, val methodName: String, val wrapper: ObjectWrapper) extends TemplateMethodModelEx {
+  import scala.reflect.runtime.{universe => ru}
+  val im = ru.runtimeMirror(target.getClass.getClassLoader).reflect(target)
+  val methodSymbol = im.symbol.typeSignature.member(ru.TermName(methodName))
+  val method = im.reflectMethod(methodSymbol.asMethod)
+
+  override def exec(arguments: java.util.List[_]): Object = {
+    wrapper.wrap(method(arguments.toArray.map(ScalaObjectWrapper.unwrap): _*))
   }
 }
 
