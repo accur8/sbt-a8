@@ -30,7 +30,7 @@ class BuildInfoGenerator(projectName: String, version: String, outputDir: File)(
       logger.debug("build info generated")
       Seq(outputBasicFile, outputDetailsFile)
     } else {
-      logger.debug("no build info generated git status failed")
+      logger.warn(s"no build info generated git status failed ${result.exitCode} --\n${result.stdout} -- \n ${result.stderr}")
       Seq()
     }
   }

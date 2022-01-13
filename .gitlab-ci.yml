@@ -1,0 +1,9 @@
+build:
+  stage: build
+  script:
+    - sbt -Djline.terminal=jline.UnsupportedTerminal clean compile test:compile
+
+test:
+  stage: test
+  script:
+    - sbt -Djline.terminal=jline.UnsupportedTerminal clean test

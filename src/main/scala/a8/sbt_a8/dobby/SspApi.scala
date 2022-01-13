@@ -8,6 +8,7 @@ trait SspApi {
   def reloadConfig(): Unit
   def config: Config
   def getAttribute(name: String, default: String): String
+  def getBoolean(name: String, default: Boolean): Boolean
   def setResponseHeader(name: String, value: String): Unit
 
 }

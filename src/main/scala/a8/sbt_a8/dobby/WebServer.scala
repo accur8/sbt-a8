@@ -30,7 +30,7 @@ class WebServer(webappRoot: Path, port: Int = 8000, host: String = "localhost")(
 
   lazy val resourceHandler = {
     val followSymlinks = true
-    new SspHandler(
+    new FeeMarkerHandler(
       webappRoot.toFile,
       Handlers.resource(
         new PathResourceManager(webappRoot, 100, followSymlinks, Seq[String](): _*)
