@@ -21,10 +21,7 @@ password=
 
 ### Publish
 ```shell
-nix-shell
-sbt
-publishSigned
-sonatypeBundleRelease
+nix-shell --command 'sbt clean publishSigned sonatypeBundleRelease'
 ```
 
 ### Troubleshooting
