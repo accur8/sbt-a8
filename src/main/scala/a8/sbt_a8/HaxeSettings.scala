@@ -1,6 +1,6 @@
 package a8.sbt_a8
 
-import sbt._
+import sbt.{Exec => SbtExec, _}
 import Keys._
 import Utilities._
 
@@ -160,7 +160,7 @@ trait HaxeSettings { self: SharedSettings =>
       if ( copySources ) {
 
         val sourcesFrom = projectRoot / s"src"
-        val sourcesTo = projectRoot / s"target/scala-2.12/classes/${impl.haxeSrcJarPath}"
+        val sourcesTo = projectRoot / s"target/scala-${ScalaVersion.majorVersion}/classes/${impl.haxeSrcJarPath}"
 
         logger.debug(s"copying haxe sources from ${sourcesFrom} into ${sourcesTo}")
         sourcesTo.mkdirs
@@ -180,8 +180,8 @@ trait HaxeSettings { self: SharedSettings =>
   def haxeSettings: Seq[Def.Setting[_]] =
     Seq(
 
-        haxeDeps := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
-        haxeDepsUnforced := processHaxeDeps(baseDirectory.value, (managedClasspath in Compile).value, (managedClasspath in Test).value, false)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        haxeDeps := processHaxeDeps(baseDirectory.value, (Compile / managedClasspath).value, (Test / managedClasspath).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        haxeDepsUnforced := processHaxeDeps(baseDirectory.value, (Compile / managedClasspath).value, (Test / managedClasspath).value, false)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
 
         haxeTestsRun := {
           haxeTestCompile.value
@@ -199,7 +199,7 @@ trait HaxeSettings { self: SharedSettings =>
             ProjectLogger(baseDirectory.value.name, streams.value.log),
           )
         },
-        (compile in Compile) := (compile in Compile).dependsOn(haxeCompile).value,
+        (Compile / compile) := (Compile / compile).dependsOn(haxeCompile).value,
 
         haxeTestCompile := {
           haxeDepsUnforced.value // force haxeDeps to run
@@ -211,7 +211,7 @@ trait HaxeSettings { self: SharedSettings =>
             ProjectLogger(baseDirectory.value.name, streams.value.log),
           )
         },
-        (test in Test) := (test in Test).dependsOn(haxeTestsRun).value,
+        (Test / test) := (Test / test).dependsOn(haxeTestsRun).value,
 
     )
 

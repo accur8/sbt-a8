@@ -11,16 +11,16 @@ trait SharedSettings {
 
   def settings: Seq[Def.Setting[_]] =
     Seq(
-      publishArtifact in (Compile, packageDoc) := false,
-      publishArtifact in packageDoc := false
+      Compile / packageDoc / publishArtifact  := false,
+      packageDoc / publishArtifact := false
     )
 
   def jvmSettings: Seq[Def.Setting[_]] =
     Seq(
       fork := true,
       javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
-      (resourceGenerators in Compile) += Def.task[Seq[File]] {
-        a8.sbt_a8.generateBuildInfo(name.value, version.value, (resourceManaged in Compile).value)(ProjectLogger(baseDirectory.value.name, streams.value.log))
+      (Compile / resourceGenerators) += Def.task[Seq[File]] {
+        a8.sbt_a8.generateBuildInfo(name.value, version.value, (Compile / resourceManaged).value)(ProjectLogger(baseDirectory.value.name, streams.value.log))
       }
     )
 

@@ -2,12 +2,12 @@
 lazy val appVersion = {
   val now = java.time.LocalDateTime.now()
   val timestamp = f"${now.getYear}%02d${1+now.getMonth.ordinal}%02d${now.getDayOfMonth}%02d_${now.getHour}%02d${now.getMinute}%02d"
-  val v = s"1.2.0-${timestamp}"
+  val v = s"1.3.0-${timestamp}"
   println(s"setting version to ${v}")
   v
 }
 
-Global / scalaVersion := "2.12.10"
+//Global / scalaVersion := "2.12.10"
 Global / sbtPlugin := true
 Global / organization := "io.accur8"
 Global / version := appVersion
@@ -28,13 +28,14 @@ developers := List(
 /** Sonatype Publishing End */
 
 lazy val root = (project in file("."))
-  .settings(
+    .enablePlugins(SbtPlugin)
+    .settings(
     name := "sbt-a8",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.0.1" % "test",
       "org.freemarker" % "freemarker" % "2.3.31",
       "io.undertow" % "undertow-core" % "2.0.26.Final",
       "com.typesafe" % "config" % "1.3.3",
-      "com.github.andyglow" %% "typesafe-config-scala" % "1.0.3",
+      "com.github.andyglow" %% "typesafe-config-scala" % "2.0.0",
     )
   )

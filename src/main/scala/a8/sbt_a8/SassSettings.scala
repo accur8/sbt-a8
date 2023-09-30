@@ -91,7 +91,7 @@ trait SassSettings { self: SharedSettings =>
           if ( copySources ) {
 
             val sourcesFrom = projectRoot / s"src"
-            val sourcesTo = projectRoot / s"target/scala-2.12/classes/${sassSrcJarPath}"
+            val sourcesTo = projectRoot / s"target/scala-${ScalaVersion.majorVersion}/classes/${sassSrcJarPath}"
 
             logger.info(s"copying sass sources from ${sourcesFrom} into ${sourcesTo}")
             sourcesTo.mkdirs
@@ -113,8 +113,8 @@ trait SassSettings { self: SharedSettings =>
 
   def sassSettings: Seq[Def.Setting[_]] =
     Seq(
-        sassDeps := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
-        sassDepsUnforced := processSassDeps(baseDirectory.value, (managedClasspath in Compile).value, false)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        sassDeps := processSassDeps(baseDirectory.value, (Compile / managedClasspath).value, true)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
+        sassDepsUnforced := processSassDeps(baseDirectory.value, (Compile / managedClasspath).value, false)(ProjectLogger(baseDirectory.value.name, streams.value.log)),
 
         sassCompile := {
           sassDepsUnforced.value // force sassDeps to run
@@ -127,7 +127,7 @@ trait SassSettings { self: SharedSettings =>
             ProjectLogger(baseDirectory.value.name, streams.value.log),
           )
         },
-        (compile in Compile) := (compile in Compile).dependsOn(sassCompile).value,
+        (Compile / compile) := (Compile / compile).dependsOn(sassCompile).value,
     )
 
 }
