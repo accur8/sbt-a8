@@ -4,12 +4,16 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    devshell.url = "github:numtide/devshell";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, devshell }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ devshell.overlays.default ];
+        };
 
         # Java 8 setup (different from other projects)
         my-java = pkgs.openjdk8_headless;
@@ -18,8 +22,10 @@
         my-ammonite = pkgs.ammonite_2_13.override { jre = my-java; };
 
       in {
-        devShells.default = pkgs.mkShell {
-          buildInputs = [
+        devShells.default = pkgs.devshell.mkShell {
+          name = "sbt-a8";
+
+          packages = [
             my-ammonite
             pkgs.exa
             my-java
