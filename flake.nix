@@ -27,7 +27,6 @@
 
           packages = [
             my-ammonite
-            pkgs.exa
             my-java
             my-sbt
             my-scala
